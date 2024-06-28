@@ -14,4 +14,4 @@ accelerate==0.28.0
 
 一个更轻更快更简单的实现:https://github.com/lansinuote/Simple_RLHF_tiny
 
-手动构建Llama3模型:https://github.com/lansinuote/Simple_Llama3
+手动构建Llama3模型:https://github.com/lansinuote/Simple_RLHF_Llama3
