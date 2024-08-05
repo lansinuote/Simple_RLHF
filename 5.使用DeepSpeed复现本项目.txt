@@ -1,0 +1,67 @@
+-- 安装deepspeed
+pip install deepspeed
+
+-- 克隆项目代码
+git clone https://github.com/microsoft/DeepSpeedExamples.git
+
+-- 安装
+pip install -e DeepSpeedExamples/applications/DeepSpeed-Chat/
+
+-- 复制数据集到项目中
+cp -a dataset DeepSpeedExamples/applications/DeepSpeed-Chat/data
+
+-- 训练actor
+deepspeed \
+--num_gpus 1 \
+DeepSpeedExamples/applications/DeepSpeed-Chat/training/step1_supervised_finetuning/main.py \
+--model_name_or_path facebook/opt-350m \
+--gradient_accumulation_steps 32 \
+--lora_dim 128 \
+--zero_stage 0 \
+--deepspeed \
+--output_dir output/actor \
+--per_device_train_batch_size 4 \
+--per_device_eval_batch_size 4 \
+--data_path local/jsonfile \
+--max_seq_len 128
+
+-- 训练critic
+deepspeed \
+--num_gpus 1 \
+DeepSpeedExamples/applications/DeepSpeed-Chat/training/step2_reward_model_finetuning/main.py \
+--model_name_or_path facebook/opt-350m \
+--num_padding_at_beginning 1 \
+--weight_decay 0.1 \
+--dropout 0.0 \
+--gradient_accumulation_steps 16 \
+--zero_stage 0 \
+--deepspeed \
+--output_dir output/critic \
+--per_device_train_batch_size 4 \
+--per_device_eval_batch_size 4 \
+--data_path local/jsonfile \
+--max_seq_len 128
+
+-- rlhf训练
+deepspeed \
+--num_gpus 1 \
+DeepSpeedExamples/applications/DeepSpeed-Chat/training/step3_rlhf_finetuning/main.py \
+--actor_model_name_or_path output/actor \
+--critic_model_name_or_path output/critic \
+--actor_zero_stage 0 \
+--critic_zero_stage 0 \
+--num_padding_at_beginning 1 \
+--gradient_accumulation_steps 8 \
+--deepspeed \
+--actor_lora_dim 128 \
+--enable_hybrid_engine \
+--actor_gradient_checkpointing \
+--actor_dropout 0.0 \
+--output_dir output/rlhf \
+--per_device_generation_batch_size 4 \
+--per_device_training_batch_size 4 \
+--data_path local/jsonfile \
+--max_prompt_seq_len 128 \
+--max_answer_seq_len 128
+
+-- 到test代码中测试训练好的模型
