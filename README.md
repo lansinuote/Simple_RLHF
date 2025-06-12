@@ -18,4 +18,4 @@ accelerate==0.28.0
 
 根据TRL的复现:https://github.com/lansinuote/Simple_RLHF_TRL
 
-Gemma3模型做数学加法运算: https://github.com/lansinuote/Simple_RLHF_Gemma3
+Gemma3模型做数学多轮问答: https://github.com/lansinuote/Simple_RLHF_Gemma3
